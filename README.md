@@ -22,8 +22,12 @@ This class provides the testing API to your tests and binds it to the ``$`` char
 		public void setUpTestContext() throws Exception {     
 			this.client = new AemClient(Type.Unit).startUp();  // Type.Integration for integrated tests
 			IResources resources = new Resources(client);     
-			$ = SetupFactory.create(ITestSetup.class).getSetup(client, resources, new Pages(client), new Components(resources, client),                                
-										new Assets(client)); 
+			$ = SetupFactory.create(ITestSetup.class).getSetup(
+					client, 
+					resources, 
+					new Pages(client), 
+					new Components(resources, client),                                
+					new Assets(client)); 
 		} 
 		
 		@After public void tearDownTestContext() throws Exception { 
@@ -31,11 +35,15 @@ This class provides the testing API to your tests and binds it to the ``$`` char
 		}
 	}
 	 ```
-Here we create an ``AemClient`` with a ``ResourceResolverType``. Currently there are two valid options: ``Type.Unit`` and ``Type.Integration``.
-We create a ``ITestSetup`` with  creation methods for``Resources``, ``Pages``, ``Components`` and ``Assets``. Skip to [How to create your own testing API](How to create your own testing API) if you want to see how to add your own project specific implementors.
+Here we create an ``AemClient`` with a ``ResourceResolverType``. Currently there are two valid 
+options: ``Type.Unit`` and ``Type.Integration``. We create a ``ITestSetup`` with  creation methods 
+for ``Resources``, ``Pages``, ``Components`` and ``Assets``. Skip to 
+[How to create your own testing API](How to create your own testing API) if you want to see how to 
+add your own project specific implementors.
 
-2. Now with the test setup available, let's add a first unit test. For example to test some Java code that needs a 
-a JCR resource on a page, create your test class and extend `UnitTestBase`. Then call your API as follows: 
+2. Now with the test setup available, let's add a first unit test. For example to test some Java 
+code that needs a JCR resource on a page, create your test class and extend `UnitTestBase`. Then 
+call your API as follows: 
 	```java
 	public class TextImageControllerTest extends UnitTestBase {
 	@Test public void isShowTitleBelowWithImagePresentAndSizeSmallAndPositionLeftReturnFalse() throws Exception {   
@@ -49,7 +57,8 @@ a JCR resource on a page, create your test class and extend `UnitTestBase`. Then
 
 ## How to create your own testing API
 
-1. Let's add our project specific creation/builder methods: We want to add API to easily create the resource `TeaserConfiguration`.
+1. Let's add our project specific creation/builder methods: We want to add API to easily create the 
+resource `TeaserConfiguration`.
 	```java
 	public class AppComponents extends Components implements IAppComponents { 
 		AppComponents(IResources resources, IAemClient client) {
@@ -66,19 +75,26 @@ a JCR resource on a page, create your test class and extend `UnitTestBase`. Then
 
 2. Now you want to inherit from `IAppComponent` in `ITestSetup`.
 	```java
-	public interface ITestSetup extends IAemClient, IAppComponents {}
+	public interface ITestSetup extends IAemClient, IResources, IPages, IAppComponents, IAssets {}
 	```
 
-3. Finally extend your `UnitTestBase` so the new method can be called directly by `$.aTeaserConfiguration(...)` within the tests.
+3. Finally extend your `UnitTestBase` so the new method can be called directly by 
+`$.aTeaserConfiguration(...)` within the tests.
 	```java
 	...
-	$ = SetupFactory.create(ITestSetup.class).getSetup(client, resources, new Components(resources, client),                                
-                                new Assets(client), new AppComponents(resources, client)); 
+	IResources resources = new Resources(client);
+	$ = SetupFactory.create(ITestSetup.class).getSetup(
+			client, 
+			resources, 
+			new Pages(client),                                
+            new Assets(client), 
+            new AppComponents(resources, client)); 
 	...
 	```
 	
 Make sure to follow some basic conventions to stay consistent with the provided API:
-* Creation/builder methods that start with `a...` take following arguments: **Parent resource, relative path (name of resource) and properties**.
+* Creation/builder methods that start with `a...` take following arguments: **Parent resource, 
+relative path (name of resource) and properties**.
   ```java
   public Resource aText(Resource parent, String relative, Object... properties) throws Exception;
   ```
@@ -114,7 +130,8 @@ AemTesting makes it easy to add your own builder implementations.
 	```
 	Make sure to override `internalBuild()` because that is where we build our `Asset` eventually.
 
-2. We want to create an `Asset` with **path** and a **mimetype**. The latter is an optional property thus we provide a default value. A builder can be implemented as follows:
+2. We want to create an `Asset` with **path** and a **mimetype**. The latter is an optional property 
+thus we provide a default value. A builder can be implemented as follows:
 	```java
 	public class AssetBuilder extends AbstractBuilder<Asset> {
         public AssetBuilder(IAemClient client) {
@@ -151,7 +168,8 @@ AemTesting makes it easy to add your own builder implementations.
 	
 
 ### Provide your own services
-Use the following API to create mocked or actual service implementations and inject them into your container.
+Use the following API from IAemClient to create mocked or actual service implementations and 
+inject them into your container.
 ```java
 <R> R require(Class<R> serviceClass, Object... properties) throws Exception;
 
@@ -187,11 +205,13 @@ private InjectedService<AppService> anAppService(NoteService noteService) throws
     return appService;
 }
 ```
-We create an injectable service of `AppService.class` with `$.service(...)`. It is injected into the test container with `$.require(...).`
+We create an injectable service of `AppService.class` with `$.service(...)`. It is injected into the
+test container with `$.require(...).`
 
 
 ### Provide your own adapters
-The mechanism for providing own adapters is basically the same as in [Sling](https://sling.apache.org/), it is surfaced in the `IAemClient` the the following two methods:
+The mechanism for providing own adapters is basically the same as in [Sling](https://sling.apache.org/), 
+it is surfaced in the `IAemClient` the the following two methods:
 ```java
 <T1, T2> void registerAdapter(Class<T1> adaptableClass, Class<T2> adapterClass, Function<T1,T2> adaptHandler);
 	
@@ -216,7 +236,7 @@ AemTesting is build on top of AemMock:
 	<dependency>
 	    <groupId>com.quatico.base</groupId>
 	    <artifactId>aem-testing</artifactId>
-	    <version>0.2.2</version>
+	    <version>0.2.1</version>
 	    <scope>test</scope>
 	</dependency>
 	```
