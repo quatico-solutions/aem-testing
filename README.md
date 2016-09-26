@@ -232,13 +232,13 @@ AemTesting is build on top of AemMock:
 1. Clone the repo.
 2. Run ``mvn clean install`` in the project root folder. 
 3. Include the artifact as dependency into your AEM project:
-	```
-	<dependency>
-	    <groupId>com.quatico.base</groupId>
-	    <artifactId>aem-testing</artifactId>
-	    <version>0.2.1</version>
-	    <scope>test</scope>
-	</dependency>
-	```
+```xml
+<dependency>
+    <groupId>com.quatico.base</groupId>
+    <artifactId>aem-testing</artifactId>
+    <version>0.2.2</version>
+    <scope>test</scope>
+</dependency>
+```
 	Read up on [How to build AEM projects using Maven](https://docs.adobe.com/docs/en/cq/5-6-1/developing/developmenttools/how-to-build-aem-projects-using-apache-maven.html) to get started with Maven.
 
