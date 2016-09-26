@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>com.quatico.base</groupId>
+	<artifactId>aem-testing-project</artifactId>
+	<version>0.2.2</version>
+	<packaging>pom</packaging>
+	
+	<organization>
+		<name>Quatico Solutions Inc.</name>
+		<url>http://www.quatico.com/</url>
+	</organization>
+	<inceptionYear>2015</inceptionYear>
+	
+	<name>AEM Testing::Aggregator</name>
+	<description>A unified testing API for AEM applications.</description>
+	
+	<scm>
+		<connection>scm:git:ssh://repository.quatico.local:7999/quaaembass/aem-testing.git</connection>
+	</scm>
+	
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	
+	<properties>
+		<project.root>${project.basedir}</project.root>
+		
+		<encoding>UTF-8</encoding>
+		<project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+		<file.encoding>${encoding}</file.encoding>
+		
+		<java.source.version>1.8</java.source.version>
+		<java.target.version>1.8</java.target.version>
+		
+		<runtime.env>dev</runtime.env>
+		<checkstyle.skip>false</checkstyle.skip>
+		
+		<aem.host>localhost</aem.host>
+		<aem.port>4502</aem.port>
+		<aem.username>admin</aem.username>
+		<aem.password>admin</aem.password>
+		
+		<deploy.userId>admin</deploy.userId>
+		<deploy.password>admin</deploy.password>
+		<deploy.useProxy>false</deploy.useProxy>
+		
+		<deploy.host>http://dockerhost:10400</deploy.host>
+		<deploy.bundleUrl>${deploy.host}/crx/repository/crx.default</deploy.bundleUrl>
+		<deploy.packageUrl>${deploy.host}/crx/packmgr/service.jsp</deploy.packageUrl>
+		<deploy.bundlePath>/apps/meteoswiss/install</deploy.bundlePath>
+		<deploy.bundleInstallationLocation>${deploy.host}${deploy.bundlePath}</deploy.bundleInstallationLocation>
+		
+		<repo-releases-id>quatico-releases</repo-releases-id>
+		<repo-releases-name>Quatico Release Repository</repo-releases-name>
+		<repo-releases-url>https://apps.quatico.com/nexus/content/repositories/quatico</repo-releases-url>
+		<repo-snapshots-id>quatico-snapshots</repo-snapshots-id>
+		<repo-snapshots-name>Quatico Snapshot Repository</repo-snapshots-name>
+		<repo-snapshots-url>https://apps.quatico.com/nexus/content/repositories/quatico-snapshots</repo-snapshots-url>
+		<sonar.jacoco.reportPath>${project.build.directory}/coverage-reports/jacoco-ut.exec</sonar.jacoco.reportPath>
+	</properties>
+	
+	<distributionManagement>
+		<repository>
+			<id>${repo-releases-id}</id>
+			<name>${repo-releases-name}</name>
+			<url>${repo-releases-url}</url>
+		</repository>
+		<snapshotRepository>
+			<uniqueVersion>true</uniqueVersion>
+			<id>${repo-snapshots-id}</id>
+			<name>${repo-snapshots-name}</name>
+			<url>${repo-snapshots-url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
+	<modules>
+		<module>aem-testing-dependencies</module>
+		<module>aem-testing</module>
+	</modules>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<id>enforce</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		
+		<!--Build plugin dependencies-->
+		<pluginManagement>
+			<plugins>
+				<!--Make sure Felix SCR Plugin is not included in build - maven-bundle-plugin with SCR plugin is used instead-->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.3.1</version>
+					<configuration>
+						<rules>
+							<requireMavenVersion>
+								<version>[3.2.5,)</version>
+							</requireMavenVersion>
+							<requireJavaVersion>
+								<version>[${java.target.version},)</version>
+							</requireJavaVersion>
+							<bannedPlugins>
+								<excludes>
+									<exclude>org.apache.felix:maven-scr-plugin</exclude>
+								</excludes>
+								<message>Please remove maven-scr-plugin from your POMs - Felix SCR annotations are now processed by maven-bundle-plugin with Felix SCR bnd plugin.</message>
+							</bannedPlugins>
+						</rules>
+					</configuration>
+				</plugin>
+				<!--Support for generating Checkstyle reports regarding the code style used by the developers-->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>2.17</version>
+					<configuration>
+						<configLocation>${project.root}/checkstyle.xml</configLocation>
+						<suppressionsLocation>${project.root}/checkstyle-suppressions.xml</suppressionsLocation>
+						<failsOnError>true</failsOnError>
+						<consoleOutput>true</consoleOutput>
+						<includeTestSourceDirectory>true</includeTestSourceDirectory>
+						<excludes>**/package-info.java</excludes>
+						<skip>${checkstyle.skip}</skip>
+					</configuration>
+				</plugin>
+				<!--Support Java compilation of source code-->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.3</version>
+					<configuration>
+						<source>${java.source.version}</source>
+						<target>${java.target.version}</target>
+						<encoding>${encoding}</encoding>
+					</configuration>
+				</plugin>
+				<!--Support copying of project resources to the target directory. Two different kinds of resources: main resources and test resources are supported. -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.1</version>
+					<configuration>
+						<encoding>${encoding}</encoding>
+						<includeEmptyDirs>true</includeEmptyDirs>
+					</configuration>
+				</plugin>
+				<!--Support creation of jar archives of the source files of the project-->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.0.1</version>
+					<inherited>true</inherited>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<version>3.0.1</version>
+				</plugin>
+				<!--Support Sling bundles-->
+				<plugin>
+					<groupId>org.apache.sling</groupId>
+					<artifactId>maven-sling-plugin</artifactId>
+					<version>2.1.6</version>
+					<configuration>
+						<user>${deploy.userId}</user>
+						<password>${deploy.password}</password>
+						<slingUrl>${deploy.bundleInstallationLocation}</slingUrl>
+					</configuration>
+				</plugin>
+				<!--Support for running unit tests before package-->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.16</version>
+					<configuration>
+						<includes>
+							<include>**/unit/**/*Test.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+						<includes>
+							<include>**/integration/**/*Test.java</include>
+						</includes>
+					</configuration>
+				
+				</plugin>
+				<!-- Use jacoco to instrument classes and gather code coverage -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.5.201505241946</version>
+					<configuration>
+						<destFile>${sonar.jacoco.reportPath}</destFile>
+						<dataFile>${sonar.jacoco.reportPath}</dataFile>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

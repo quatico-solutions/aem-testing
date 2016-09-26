@@ -1,0 +1,8 @@
+*.iws
+.DS_Store
+target/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/atlassian-ide-plugin.xml
+.idea/shelf
+.idea/dictionaries/
