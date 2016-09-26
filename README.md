@@ -240,5 +240,5 @@ AemTesting is build on top of AemMock:
     <scope>test</scope>
 </dependency>
 ```
-	Read up on [How to build AEM projects using Maven](https://docs.adobe.com/docs/en/cq/5-6-1/developing/developmenttools/how-to-build-aem-projects-using-apache-maven.html) to get started with Maven.
+Read up on [How to build AEM projects using Maven](https://docs.adobe.com/docs/en/cq/5-6-1/developing/developmenttools/how-to-build-aem-projects-using-apache-maven.html) to get started with Maven.
 
