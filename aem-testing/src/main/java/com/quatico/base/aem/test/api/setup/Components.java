@@ -73,7 +73,7 @@ public class Components implements IComponents {
 		return resources.aResource(path, new Properties(properties).append(RESOURCE_TYPE, type).toArray());
 	}
 	
-	private String getComponentPath(Resource pageResource, String relativePath) {
+	protected String getComponentPath(Resource pageResource, String relativePath) {
 		String   result  = pageResource.getPath();
 		Resource content = pageResource.getChild(JCR_CONTENT);
 		if (content != null) {
